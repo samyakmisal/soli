@@ -4,645 +4,707 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>chotehath → minimeow 💚</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --pink: #f48fb1;
-    --pink-dark: #c2185b;
-    --pink-deep: #880e4f;
-    --peach: #ffccbc;
-    --lavender: #e1bee7;
-    --green: #a5d6a7;
-    --green-dark: #388e3c;
-    --bg: #fce4ec;
-    --block1: #fce4ec;
-    --block2: #f8bbd9;
-    --block3: #e8f5e9;
-    --block4: #fff3e0;
-    --block5: #f3e5f5;
-    --block6: #fddde6;
-    --white: #fffafa;
-    --pixel: 'Press Start 2P', monospace;
-    --body: 'Nunito', sans-serif;
-  }
+:root{
+  --pink:#f48fb1; --pink-dark:#c2185b; --pink-deep:#880e4f;
+  --bg:#fce4ec; --meow-bg:#ede0f7;
+  --px:'Press Start 2P',monospace; --body:'Nunito',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100vw;height:100vh;overflow:hidden;}
+body{
+  font-family:var(--body);
+  background:var(--bg);
+  position:relative;
+  user-select:none;
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E") 16 16,auto;
+  transition:background 1s;
+}
+body.meowMode{ background:var(--meow-bg); }
+body.meowMode .pxBlock{ filter:hue-rotate(55deg) saturate(1.2); }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* grid */
+#pixelGrid{position:fixed;inset:0;z-index:0;pointer-events:none;display:grid;grid-template-columns:repeat(auto-fill,44px);grid-template-rows:repeat(auto-fill,44px);}
+.pxBlock{width:44px;height:44px;border:2px solid rgba(255,255,255,.32);transition:filter 1s;}
 
-  body {
-    font-family: var(--body);
-    background: var(--bg);
-    overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    position: relative;
-    user-select: none;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E") 16 16, auto;
-  }
+/* floaters */
+#floatLayer{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+.floater{position:absolute;animation:floatUp linear infinite;opacity:0;pointer-events:none;}
+@keyframes floatUp{0%{transform:translateY(0) rotate(0) scale(.8);opacity:0}8%{opacity:.65}90%{opacity:.65}100%{transform:translateY(-110vh) rotate(360deg) scale(1.1);opacity:0}}
 
-  body.meowMode { --bg: #ffd6e7; background: var(--bg); }
-  body.meowMode #meterFill { background: linear-gradient(90deg, #ff80ab, #ff1493, #ff80ab); background-size: 200% 100%; animation: shimmer 2s linear infinite; }
+/* falling items */
+#gameLayer{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.fallingItem{position:absolute;font-size:32px;cursor:pointer;pointer-events:all;animation:fall linear forwards;transition:transform .08s;}
+.fallingItem:hover{transform:scale(1.4) rotate(-8deg)!important;}
+@keyframes fall{0%{top:-70px}100%{top:110vh}}
 
-  @keyframes shimmer { 0% { background-position: 0 0; } 100% { background-position: 200% 0; } }
+/* ui layer */
+#uiLayer{position:fixed;inset:0;z-index:3;pointer-events:none;}
 
-  /* ── PIXEL GRID BG ── */
-  #pixelGrid {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 44px);
-    grid-template-rows: repeat(auto-fill, 44px);
-    gap: 0;
-  }
+/* ── METER ── */
+#meterBox{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.95);border-radius:22px;
+  padding:12px 24px 14px;min-width:290px;
+  box-shadow:0 6px 28px rgba(244,143,177,.3),0 0 0 3px rgba(255,255,255,.8);
+  pointer-events:all;backdrop-filter:blur(10px);
+}
+#meterLabel{font-family:var(--px);font-size:6.5px;color:var(--pink-dark);margin-bottom:8px;text-align:center;line-height:1.8;}
+#meterTrack{background:#fce4ec;border-radius:20px;height:20px;border:2.5px solid var(--pink);overflow:hidden;}
+#meterFill{
+  height:100%;width:0%;border-radius:20px;
+  background:linear-gradient(90deg,#f48fb1,#e91e8c,#f48fb1);
+  background-size:200% 100%;
+  animation:shimmer 3s linear infinite;
+  transition:width .55s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+#meterFill::after{content:'✨';position:absolute;right:-5px;top:50%;transform:translateY(-50%);font-size:15px;}
+#meterFill.hurt{
+  background:linear-gradient(90deg,#e53935,#ff1744,#e53935)!important;
+  background-size:200% 100%!important;
+  animation:shimmerRed .35s linear infinite!important;
+}
+@keyframes shimmer{0%{background-position:0 0}100%{background-position:200% 0}}
+@keyframes shimmerRed{0%{background-position:0 0}100%{background-position:200% 0}}
+#meterPct{text-align:center;font-size:10px;color:var(--pink-dark);margin-top:5px;font-weight:900;font-family:var(--px);}
 
-  .pxBlock {
-    width: 44px; height: 44px;
-    border: 2px solid rgba(255,255,255,0.35);
-    transition: opacity 0.5s;
-    image-rendering: pixelated;
-  }
+/* ── LIVES (meow only) ── */
+#livesBox{
+  position:absolute;top:16px;right:16px;
+  background:rgba(255,255,255,.93);border-radius:14px;
+  padding:9px 15px;font-family:var(--px);font-size:7px;color:#7b1fa2;
+  pointer-events:all;box-shadow:0 4px 18px rgba(149,117,205,.25);
+  backdrop-filter:blur(6px);line-height:2;text-align:center;
+  display:none;
+}
+#livesDisplay{font-size:20px;letter-spacing:3px;margin-top:3px;}
 
-  /* ── FLOATING PARTICLES ── */
-  #floatLayer { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
-  .floater {
-    position: absolute; font-size: 22px;
-    animation: floatUp linear infinite;
-    pointer-events: none; opacity: 0;
-  }
-  @keyframes floatUp {
-    0%   { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
-    8%   { opacity: 0.75; }
-    90%  { opacity: 0.75; }
-    100% { transform: translateY(-110vh) rotate(400deg) scale(1.1); opacity: 0; }
-  }
+/* ── CAT TOGGLE SLIDER ── */
+#modeToggleWrap{
+  position:absolute;bottom:22px;right:18px;
+  pointer-events:all;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+#modeLabel{
+  font-family:var(--px);font-size:6px;
+  color:var(--pink-dark);text-align:center;line-height:1.8;
+  transition:color .4s;
+}
+body.meowMode #modeLabel{ color:#7b1fa2; }
 
-  /* ── GAME LAYER (falling potatoes) ── */
-  #gameLayer { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-  .fallingPotato {
-    position: absolute; font-size: 30px;
-    cursor: pointer; pointer-events: all;
-    animation: fall linear forwards;
-    filter: drop-shadow(0 2px 6px rgba(255,100,150,0.4));
-    transition: transform 0.1s;
-  }
-  .fallingPotato:hover { transform: scale(1.4) rotate(-10deg) !important; }
-  @keyframes fall { 0% { top: -70px; } 100% { top: 108vh; } }
+/* the slider track */
+#catSlider{
+  width:72px;height:36px;
+  background:#f8bbd0;
+  border-radius:18px;
+  border:2.5px solid var(--pink);
+  position:relative;cursor:pointer;
+  transition:background .4s, border-color .4s;
+  box-shadow:0 3px 12px rgba(244,143,177,.25);
+}
+body.meowMode #catSlider{background:#d1b3e8;border-color:#9c4dcc;}
 
-  /* ── UI LAYER ── */
-  #uiLayer { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+/* knob */
+#catKnob{
+  position:absolute;top:3px;left:3px;
+  width:26px;height:26px;
+  background:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+  transition:left .35s cubic-bezier(.34,1.56,.64,1), background .3s;
+  line-height:1;
+}
+body.meowMode #catKnob{left:39px; background:#f3e5f5;}
+#sliderEmoji{ transition:transform .3s; display:inline-block; }
+body.meowMode #sliderEmoji{ transform:rotate(20deg) scale(1.1); }
 
-  /* ── SORRY METER ── */
-  #meterBox {
-    position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
-    background: rgba(255,255,255,0.94);
-    border-radius: 20px;
-    padding: 12px 22px 14px;
-    min-width: 300px;
-    box-shadow: 0 6px 30px rgba(244,143,177,0.35), 0 0 0 3px rgba(255,255,255,0.8);
-    pointer-events: all;
-    backdrop-filter: blur(8px);
-  }
-  #meterLabel {
-    font-family: var(--pixel);
-    font-size: 7px;
-    color: var(--pink-dark);
-    margin-bottom: 8px;
-    text-align: center;
-    line-height: 1.6;
-  }
-  #meterTrack {
-    background: #fce4ec; border-radius: 20px; height: 18px;
-    border: 2.5px solid var(--pink); overflow: hidden;
-    position: relative;
-  }
-  #meterFill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, #f48fb1, #e91e8c, #f48fb1);
-    background-size: 200% 100%;
-    animation: shimmer 3s linear infinite;
-    border-radius: 20px;
-    transition: width 0.6s cubic-bezier(.34,1.56,.64,1);
-    position: relative;
-  }
-  #meterFill::after {
-    content: '✨';
-    position: absolute; right: -4px; top: 50%; transform: translateY(-50%);
-    font-size: 14px;
-  }
-  #meterPct {
-    text-align: center; font-size: 11px;
-    color: var(--pink-dark); margin-top: 5px;
-    font-weight: 900; font-family: var(--pixel);
-  }
+/* ── HINT ── */
+#gameHint{
+  position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.88);border-radius:14px;padding:8px 18px;
+  font-size:12px;color:var(--pink-deep);font-weight:700;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(244,143,177,.18);backdrop-filter:blur(6px);
+  pointer-events:none;
+}
 
-  /* ── SCORE ── */
-  #scoreBox {
-    position: absolute; top: 18px; right: 18px;
-    background: rgba(255,255,255,0.92);
-    border-radius: 14px; padding: 8px 16px;
-    font-family: var(--pixel); font-size: 8px; color: var(--pink-dark);
-    pointer-events: all;
-    box-shadow: 0 4px 18px rgba(244,143,177,0.25), 0 0 0 2px rgba(255,255,255,0.8);
-    backdrop-filter: blur(6px);
-    line-height: 1.8;
-  }
+/* ── IDLE ── */
+#idleMsg{
+  position:absolute;bottom:76px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.97);border-radius:18px;padding:11px 20px;
+  font-size:14px;color:var(--pink-dark);text-align:center;display:none;
+  animation:wiggle .6s ease-in-out infinite alternate;pointer-events:none;
+  box-shadow:0 6px 28px rgba(244,143,177,.35);font-weight:800;
+  border:2px dashed var(--pink);white-space:nowrap;
+}
+@keyframes wiggle{0%{transform:translateX(-50%) rotate(-2.5deg)}100%{transform:translateX(-50%) rotate(2.5deg)}}
 
-  /* ── GAME INSTRUCTIONS ── */
-  #gameInstructions {
-    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-    background: rgba(255,255,255,0.88);
-    border-radius: 14px; padding: 9px 18px;
-    font-size: 12px; color: var(--pink-deep);
-    font-weight: 700; text-align: center;
-    pointer-events: all; white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(244,143,177,0.2);
-    backdrop-filter: blur(6px);
-  }
+/* ── STATIC POTATOES ── */
+.potato{
+  position:absolute;font-size:32px;cursor:pointer;pointer-events:all;
+  z-index:4;animation:potatoBob ease-in-out infinite alternate;
+  filter:drop-shadow(0 3px 8px rgba(255,100,150,.28));transition:filter .2s;
+}
+.potato:hover{filter:drop-shadow(0 0 18px rgba(244,143,177,.9)) drop-shadow(0 0 6px #fff);}
+@keyframes potatoBob{0%{transform:translateY(0) rotate(-3deg)}100%{transform:translateY(-9px) rotate(3deg)}}
+.potato.clicked{animation:potatoPop .55s forwards!important;cursor:default;pointer-events:none;}
+@keyframes potatoPop{0%{transform:scale(1) rotate(0)}25%{transform:scale(1.9) rotate(22deg)}55%{transform:scale(.72) rotate(-14deg)}80%{transform:scale(1.12) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
 
-  /* ── IDLE MESSAGE ── */
-  #idleMsg {
-    position: absolute; bottom: 72px; left: 50%; transform: translateX(-50%);
-    background: rgba(255,255,255,0.97);
-    border-radius: 18px; padding: 13px 22px;
-    font-size: 15px; color: var(--pink-dark);
-    text-align: center; display: none;
-    animation: wiggle 0.6s ease-in-out infinite alternate;
-    pointer-events: none;
-    box-shadow: 0 6px 30px rgba(244,143,177,0.4);
-    font-weight: 800;
-    border: 2px dashed var(--pink);
-  }
-  @keyframes wiggle {
-    0%  { transform: translateX(-50%) rotate(-3deg) scale(1); }
-    100%{ transform: translateX(-50%) rotate(3deg) scale(1.04); }
-  }
+/* ── SPARKLES ── */
+.sparkle{position:fixed;font-size:18px;pointer-events:none;z-index:50;animation:sparklePop .9s forwards;}
+@keyframes sparklePop{0%{transform:scale(0) translate(0,0);opacity:1}60%{opacity:.9}100%{transform:scale(1.6) translate(var(--dx),var(--dy));opacity:0}}
 
-  /* ── STATIONARY POTATOES ── */
-  .potato {
-    position: absolute; font-size: 34px;
-    cursor: pointer; pointer-events: all;
-    z-index: 4;
-    animation: potatoBob ease-in-out infinite alternate;
-    filter: drop-shadow(0 3px 8px rgba(255,100,150,0.3));
-    transition: filter 0.2s;
-  }
-  .potato:hover { filter: drop-shadow(0 0 16px rgba(244,143,177,0.9)) drop-shadow(0 0 6px #fff); }
-  @keyframes potatoBob {
-    0%   { transform: translateY(0) rotate(-3deg); }
-    100% { transform: translateY(-10px) rotate(3deg); }
-  }
-  .potato.clicked { animation: potatoPop 0.6s forwards !important; cursor: default; pointer-events: none; }
-  @keyframes potatoPop {
-    0%   { transform: scale(1) rotate(0); }
-    25%  { transform: scale(1.8) rotate(25deg); }
-    55%  { transform: scale(0.7) rotate(-15deg); }
-    80%  { transform: scale(1.15) rotate(5deg); }
-    100% { transform: scale(1) rotate(0); }
-  }
+/* ── TOAST ── */
+.toast{
+  position:fixed;background:rgba(255,255,255,.98);border-radius:16px;
+  padding:10px 16px;font-size:13px;color:var(--pink-deep);z-index:200;
+  box-shadow:0 6px 26px rgba(244,143,177,.3),0 0 0 2px var(--pink);
+  pointer-events:all;max-width:200px;text-align:center;font-weight:700;
+  animation:toastIn .32s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.bad{color:#b71c1c;box-shadow:0 6px 26px rgba(229,57,53,.3),0 0 0 2px #e53935;}
+@keyframes toastIn{0%{transform:scale(.4) rotate(-8deg);opacity:0}70%{transform:scale(1.05) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
 
-  /* ── SPARKLES ── */
-  .sparkle {
-    position: fixed; font-size: 18px;
-    pointer-events: none; z-index: 50;
-    animation: sparklePop 0.9s forwards;
-  }
-  @keyframes sparklePop {
-    0%   { transform: scale(0) translate(0,0); opacity: 1; }
-    60%  { opacity: 0.9; }
-    100% { transform: scale(1.6) translate(var(--dx), var(--dy)); opacity: 0; }
-  }
+/* ── FLASH ── */
+#flashOverlay{position:fixed;inset:0;z-index:90;pointer-events:none;background:rgba(229,57,53,0);transition:background .12s;}
+#flashOverlay.flash{background:rgba(229,57,53,.28);}
 
-  /* ── TOAST MESSAGES ── */
-  .toast {
-    position: fixed;
-    background: rgba(255,255,255,0.98);
-    border-radius: 16px; padding: 11px 18px;
-    font-size: 13px; color: var(--pink-deep);
-    z-index: 10;
-    box-shadow: 0 6px 28px rgba(244,143,177,0.35), 0 0 0 2px var(--pink);
-    pointer-events: all; max-width: 210px;
-    text-align: center; font-weight: 700;
-    animation: toastIn 0.35s cubic-bezier(.34,1.56,.64,1);
-    border: 1.5px solid rgba(244,143,177,0.4);
-  }
-  @keyframes toastIn {
-    0%   { transform: scale(0.4) rotate(-8deg); opacity: 0; }
-    70%  { transform: scale(1.05) rotate(2deg); }
-    100% { transform: scale(1) rotate(0); opacity: 1; }
-  }
+/* ── SECRET ROW ── */
+#secretRow{position:fixed;bottom:22px;left:18px;z-index:5;display:flex;gap:7px;pointer-events:all;}
+.secretEmoji{font-size:20px;cursor:pointer;opacity:.45;transition:all .2s;animation:sFloat ease-in-out infinite alternate;}
+.secretEmoji:hover{opacity:1;transform:scale(1.45) rotate(-10deg);}
+@keyframes sFloat{0%{transform:translateY(0)}100%{transform:translateY(-5px)}}
 
-  /* ── MINIMEOW MODE TOGGLE ── */
-  #minimeowToggle {
-    position: absolute; bottom: 20px; right: 18px;
-    background: rgba(255,255,255,0.92);
-    border: 2.5px solid var(--pink);
-    border-radius: 22px; padding: 8px 14px;
-    font-size: 11px; color: var(--pink-dark);
-    cursor: pointer; pointer-events: all;
-    font-weight: 800; z-index: 20;
-    transition: all 0.2s; font-family: var(--body);
-    box-shadow: 0 3px 12px rgba(244,143,177,0.2);
-  }
-  #minimeowToggle:hover {
-    background: var(--pink); color: white;
-    transform: scale(1.05) rotate(-2deg);
-    box-shadow: 0 6px 20px rgba(244,143,177,0.5);
-  }
+/* ════ OPENING POPUP ════ */
+#openingPopup{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(12,4,20,.88);backdrop-filter:blur(5px);
+}
+#openingCard{
+  background:#110d1f;border:3px solid #f48fb1;border-radius:8px;
+  padding:38px 36px 32px;max-width:380px;width:90%;text-align:center;
+  box-shadow:0 0 0 6px rgba(244,143,177,.08),0 0 60px rgba(244,143,177,.2);
+  animation:scanIn .45s ease;
+}
+@keyframes scanIn{0%{clip-path:inset(100% 0 0 0)}100%{clip-path:inset(0% 0 0 0)}}
+.op-emoji{font-size:52px;display:block;margin-bottom:10px;animation:opBob .8s ease-in-out infinite alternate;}
+@keyframes opBob{0%{transform:translateY(0) rotate(-5deg)}100%{transform:translateY(-8px) rotate(5deg)}}
+.op-title{font-family:var(--px);font-size:12px;color:#f48fb1;line-height:2;margin-bottom:6px;text-shadow:0 0 14px rgba(244,143,177,.5);}
+.op-sub{font-family:var(--px);font-size:7px;color:#e1bee7;line-height:2.2;margin-bottom:22px;}
+.op-rule{font-size:14px;color:#fff;font-weight:700;margin-bottom:8px;line-height:1.6;}
+.op-rule span{color:#f48fb1;}
+.op-rule.warn span{color:#ff6b6b;}
+#startBtn{
+  margin-top:18px;font-family:var(--px);font-size:10px;
+  background:#f48fb1;color:#fff;border:none;
+  padding:13px 32px;border-radius:6px;cursor:pointer;
+  box-shadow:0 5px 0 #c2185b;transition:all .1s;display:inline-block;
+}
+#startBtn:hover{background:#e91e8c;transform:translateY(2px);box-shadow:0 3px 0 #c2185b;}
+#startBtn:active{transform:translateY(5px);box-shadow:none;}
+.op-blink{font-family:var(--px);font-size:6px;color:rgba(244,143,177,.6);margin-top:14px;display:block;animation:blink 1.2s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-  /* ── SECRET EMOJI ROW ── */
-  #secretRow {
-    position: fixed; bottom: 20px; left: 18px;
-    z-index: 5; display: flex; gap: 6px;
-    pointer-events: all;
-  }
-  .secretEmoji {
-    font-size: 22px; cursor: pointer;
-    opacity: 0.55; transition: all 0.2s;
-    filter: drop-shadow(0 2px 4px rgba(244,143,177,0.3));
-    animation: secretFloat ease-in-out infinite alternate;
-  }
-  .secretEmoji:hover { opacity: 1; transform: scale(1.4) rotate(-10deg); }
-  @keyframes secretFloat {
-    0%   { transform: translateY(0); }
-    100% { transform: translateY(-5px); }
-  }
+/* ════ MEOW MODE MINI-POPUP ════ */
+#meowPopup{
+  position:fixed;inset:0;z-index:500;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(40,10,60,.75);backdrop-filter:blur(6px);
+}
+#meowCard{
+  background:#1a0a2e;border:2.5px solid #ce93d8;border-radius:14px;
+  padding:28px 30px;max-width:300px;width:86%;text-align:center;
+  box-shadow:0 0 50px rgba(206,147,216,.35);
+  animation:meowPop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes meowPop{0%{transform:scale(.3) rotate(-10deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.meow-cat{font-size:58px;display:block;animation:catPanic .25s ease-in-out infinite alternate;margin-bottom:6px;}
+@keyframes catPanic{0%{transform:rotate(-10deg) scale(1)}100%{transform:rotate(10deg) scale(1.1)}}
+.meow-title{font-family:var(--px);font-size:9px;color:#ce93d8;line-height:2;margin-bottom:6px;}
+.meow-tip{font-size:13px;color:#e8d5f5;font-weight:700;line-height:1.7;margin-bottom:18px;}
+.meow-tip span{color:#ff80ab;}
+#meowOkBtn{
+  font-family:var(--px);font-size:8px;
+  background:#ce93d8;color:#1a0a2e;border:none;
+  padding:11px 22px;border-radius:6px;cursor:pointer;
+  box-shadow:0 4px 0 #7b1fa2;transition:all .1s;
+}
+#meowOkBtn:hover{background:#ba68c8;transform:translateY(2px);box-shadow:0 2px 0 #7b1fa2;}
 
-  /* ── FINAL SCENE ── */
-  #finalScene {
-    position: fixed; inset: 0; z-index: 100;
-    display: none; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: rgba(252, 228, 236, 0.97);
-    backdrop-filter: blur(12px);
-    animation: fadeInScene 1.2s ease;
-    overflow: hidden;
-  }
-  @keyframes fadeInScene { 0% { opacity: 0; } 100% { opacity: 1; } }
+/* ════ GAME OVER ════ */
+#gameOverScreen{
+  position:fixed;inset:0;z-index:800;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(10,4,18,.92);backdrop-filter:blur(6px);
+}
+#gameOverCard{
+  background:#110d1f;border:2.5px solid #e53935;border-radius:8px;
+  padding:36px 38px;max-width:360px;width:88%;text-align:center;
+  box-shadow:0 0 50px rgba(229,57,53,.3);animation:scanIn .45s ease;
+}
+.go-emoji{font-size:52px;display:block;margin-bottom:8px;}
+.go-title{font-family:var(--px);font-size:11px;color:#e53935;line-height:2;margin-bottom:10px;}
+.go-sub{font-family:var(--px);font-size:6.5px;color:#ffcdd2;line-height:2.4;margin-bottom:22px;}
+#retryBtn{
+  font-family:var(--px);font-size:9px;background:#e53935;color:#fff;
+  border:none;padding:11px 26px;border-radius:6px;cursor:pointer;
+  box-shadow:0 4px 0 #b71c1c;transition:all .1s;
+}
+#retryBtn:hover{transform:translateY(2px);box-shadow:0 2px 0 #b71c1c;}
 
-  #finalCard {
-    background: rgba(255,255,255,0.95);
-    border-radius: 28px;
-    padding: 40px 50px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(244,143,177,0.4), 0 0 0 3px rgba(255,255,255,0.9);
-    border: 2px solid rgba(244,143,177,0.3);
-    position: relative; z-index: 2;
-    animation: cardPop 0.8s 0.5s cubic-bezier(.34,1.56,.64,1) both;
-    max-width: 420px;
-  }
-  @keyframes cardPop { 0% { transform: scale(0.5) rotate(-8deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+/* ════ FINAL SCENE ════ */
+#finalScene{
+  position:fixed;inset:0;z-index:900;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(252,228,236,.96);backdrop-filter:blur(14px);overflow:hidden;
+}
+#confettiLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.confettiPiece{position:absolute;top:-20px;border-radius:3px;animation:confettiFall linear forwards;}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0) scaleX(1);opacity:1}80%{opacity:1}100%{transform:translateY(110vh) rotate(720deg) scaleX(-1);opacity:0}}
+#finalCard{
+  background:rgba(255,255,255,.97);border-radius:28px;
+  padding:34px 42px;text-align:center;z-index:2;position:relative;
+  box-shadow:0 20px 60px rgba(244,143,177,.4),0 0 0 3px rgba(255,255,255,.9);
+  border:2px solid rgba(244,143,177,.3);
+  animation:finalPop .9s .3s cubic-bezier(.34,1.56,.64,1) both;
+  max-width:460px;
+}
+@keyframes finalPop{0%{transform:scale(.3) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.cats-row{font-size:50px;display:block;margin-bottom:8px;animation:catsDance .7s ease-in-out infinite alternate;}
+@keyframes catsDance{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-10px) scale(1.05)}}
+.fin-title{font-family:var(--px);font-size:10px;color:var(--pink-dark);line-height:2.4;margin-bottom:10px;}
+.fin-msg{font-size:15px;color:var(--pink-deep);font-weight:800;line-height:1.9;margin-bottom:12px;}
+.fin-funny{
+  font-size:12px;color:#aaa;line-height:1.8;margin-bottom:20px;
+  border-top:1.5px dashed var(--pink);padding-top:12px;font-weight:700;
+}
+.fin-funny span{color:var(--pink-dark);}
+#finalBack{
+  font-family:var(--px);font-size:7.5px;
+  background:var(--pink);color:#fff;border:none;
+  padding:10px 22px;border-radius:20px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(244,143,177,.4);transition:all .2s;
+  opacity:0;animation:fadeIn 1s 3.5s ease forwards;
+}
+#finalBack:hover{background:var(--pink-dark);transform:scale(1.05);}
+@keyframes fadeIn{to{opacity:1}}
+.burstEmoji{position:fixed;font-size:30px;pointer-events:none;z-index:1;animation:burst ease-out forwards;}
+@keyframes burst{0%{transform:translate(-50%,-50%) scale(0);opacity:1}60%{opacity:1}100%{transform:translate(calc(-50% + var(--bx)),calc(-50% + var(--by))) scale(1.5);opacity:0}}
 
-  #finalTitle {
-    font-family: var(--pixel); font-size: 13px;
-    color: var(--pink-dark); line-height: 2.2;
-    margin-bottom: 12px;
-  }
-  #finalMsg {
-    font-size: 20px; color: var(--pink-deep);
-    font-weight: 800; line-height: 1.6;
-    margin-bottom: 8px;
-  }
-  #finalSub {
-    font-size: 15px; color: var(--pink-dark);
-    font-weight: 600; opacity: 0;
-    animation: fadeInSub 1s 2.5s ease forwards;
-    margin-bottom: 20px;
-  }
-  @keyframes fadeInSub { to { opacity: 1; } }
-  #finalBack {
-    font-size: 13px; color: var(--pink-dark);
-    cursor: pointer; text-decoration: underline;
-    font-weight: 700; background: none; border: none;
-    font-family: var(--body); opacity: 0;
-    animation: fadeInSub 1s 3.5s ease forwards;
-  }
-  #finalBack:hover { color: var(--pink-deep); }
+/* shake */
+@keyframes shake{0%,100%{transform:translate(0)}15%{transform:translate(-7px,0)}35%{transform:translate(7px,0)}55%{transform:translate(-4px,0)}75%{transform:translate(4px,0)}}
+body.shake{animation:shake .35s ease;}
 
-  .burstEmoji {
-    position: fixed; font-size: 32px;
-    pointer-events: none; z-index: 1;
-    animation: burst ease-out forwards;
-  }
-  @keyframes burst {
-    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
-    60%  { opacity: 1; }
-    100% { transform: translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1.6); opacity: 0; }
-  }
-
-  /* ── TITLE HEADER ── */
-  #siteTitle {
-    position: fixed; top: 18px; left: 18px;
-    z-index: 5; pointer-events: none;
-  }
-  #siteTitle span {
-    font-family: var(--pixel); font-size: 8px;
-    color: var(--pink-dark); display: block;
-    line-height: 2; opacity: 0.8;
-    text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
-  }
-
-  /* ── TYPEWRITER ── */
-  .typewriter { display: inline-block; overflow: hidden; white-space: nowrap; }
-
-  /* ── MOBILE ── */
-  @media (max-width: 600px) {
-    #meterBox { min-width: 240px; padding: 10px 14px 12px; }
-    #meterLabel { font-size: 6px; }
-    #scoreBox { font-size: 7px; }
-    #finalCard { padding: 28px 26px; margin: 0 16px; }
-    #finalTitle { font-size: 10px; }
-    #finalMsg { font-size: 17px; }
-    .potato { font-size: 28px; }
-    #siteTitle { display: none; }
-    #gameInstructions { font-size: 10px; padding: 8px 12px; }
-  }
+@media(max-width:580px){
+  #meterBox{min-width:230px;padding:10px 14px 12px;}
+  #meterLabel{font-size:5.5px;}
+  #finalCard{padding:24px 20px;margin:0 12px;}
+  .fin-title{font-size:8px;}
+  #openingCard{padding:26px 22px;}
+  .op-title{font-size:9px;}
+}
 </style>
 </head>
 <body>
 
-<!-- PIXEL BACKGROUND GRID -->
 <div id="pixelGrid"></div>
-
-<!-- FLOATING PARTICLES -->
 <div id="floatLayer"></div>
-
-<!-- FALLING POTATO GAME -->
 <div id="gameLayer"></div>
+<div id="flashOverlay"></div>
 
-<!-- SITE TITLE -->
-<div id="siteTitle">
-  <span>🥔 chotehath</span>
-  <span>→ minimeow 💚</span>
-</div>
-
-<!-- UI LAYER -->
+<!-- UI -->
 <div id="uiLayer">
   <div id="meterBox">
-    <div id="meterLabel">chotehath trying to say sorry<br>to minimeow 💚</div>
+    <div id="meterLabel">sorry meter 💚<br>chotehath → minimeow</div>
     <div id="meterTrack"><div id="meterFill"></div></div>
     <div id="meterPct">0%</div>
   </div>
 
-  <div id="scoreBox">
-    🥔 caught: <span id="catchCount">0</span><br>
-    🍠 transformed: <span id="transCount">0</span>
+  <!-- lives (meow mode only) -->
+  <div id="livesBox">
+    lives<br>
+    <div id="livesDisplay">🥔🥔🥔</div>
   </div>
 
-  <div id="gameInstructions">🥔 click potatoes to transform them! catch falling ones too!</div>
-  <div id="idleMsg">don't ignore me like this 😭</div>
-  <div id="minimeowToggle">🐾 minimeow mode</div>
+  <!-- cat mode toggle -->
+  <div id="modeToggleWrap">
+    <div id="modeLabel">normal 🌸<br>mode</div>
+    <div id="catSlider" title="toggle minimeow mode">
+      <div id="catKnob"><span id="sliderEmoji">🐱</span></div>
+    </div>
+  </div>
+
+  <div id="gameHint">🥔 click potatoes &nbsp;·&nbsp; 🔪 avoid knives!</div>
+  <div id="idleMsg">hey… don't ignore me 😭</div>
 </div>
 
-<!-- SECRET EMOJI ROW -->
+<!-- secret emojis -->
 <div id="secretRow"></div>
 
-<!-- FINAL SCENE -->
+<!-- ════ OPENING POPUP ════ -->
+<div id="openingPopup">
+  <div id="openingCard">
+    <span class="op-emoji">🥔</span>
+    <div class="op-title">SORRY QUEST!</div>
+    <div class="op-sub">from chotehath · to minimeow 🐾</div>
+
+    <div class="op-rule">🥔 → 🍠 &nbsp; <span>click potatoes!</span></div>
+    <div class="op-rule">🥔 falling? &nbsp; <span>catch them!</span></div>
+    <div class="op-rule warn">🔪 falling? &nbsp; <span class="warn" style="color:#ff6b6b">don't click!</span></div>
+
+    <button id="startBtn">▶ &nbsp; LET'S GO!</button>
+    <span class="op-blink">tap anywhere to start</span>
+  </div>
+</div>
+
+<!-- ════ MEOW MODE MINI-POPUP ════ -->
+<div id="meowPopup">
+  <div id="meowCard">
+    <span class="meow-cat">😱</span>
+    <div class="meow-title">HARD MODE!</div>
+    <div class="meow-tip">
+      potatoes fall <span>faster</span>!<br>
+      miss 3 → game over 🥔<br>
+      (you asked for this 😭)
+    </div>
+    <button id="meowOkBtn">I'M READY 😤</button>
+  </div>
+</div>
+
+<!-- ════ GAME OVER ════ -->
+<div id="gameOverScreen">
+  <div id="gameOverCard">
+    <span class="go-emoji">😿</span>
+    <div class="go-title">GAME OVER</div>
+    <div class="go-sub">
+      too many potatoes escaped!<br><br>
+      minimeow is still waiting…<br>
+      try again, chotehath!
+    </div>
+    <button id="retryBtn">↺ &nbsp; TRY AGAIN</button>
+  </div>
+</div>
+
+<!-- ════ FINAL SCENE ════ -->
 <div id="finalScene">
+  <div id="confettiLayer"></div>
   <div id="finalCard">
-    <div id="finalTitle">minimeow 🐾</div>
-    <div id="finalMsg">i'm really sorry 💚<br>from chotehath 🥔➡️🍠</div>
-    <div id="finalSub">you matter a lot. always. 🌺💐✨</div>
-    <button id="finalBack" onclick="closeFinal()">↩ go back to the world</button>
+    <span class="cats-row">🐱😸🐾😻🐱</span>
+    <div class="fin-title">✨ minimeow ✨<br>we did it!</div>
+    <div class="fin-msg">
+      i'm really truly sorry 💚<br>
+      (practiced this 47 times btw)<br>
+      from your dumb chotehath 🥔
+    </div>
+    <div class="fin-funny">
+      <span>official certificate:</span><br>
+      i was wrong. you were right. as always.<br>
+      pls don't stay mad 😭 💐
+    </div>
+    <button id="finalBack" onclick="closeFinal()">↩ back to the world</button>
   </div>
 </div>
 
 <script>
 // ── PIXEL GRID ──
-const BLOCK_COLORS = ['#fce4ec','#fce4ec','#fce4ec','#f8bbd9','#f8bbd9','#e8f5e9','#fff3e0','#f3e5f5','#fddde6','#ffe0b2'];
-const grid = document.getElementById('pixelGrid');
-const cols = Math.ceil(window.innerWidth / 44) + 2;
-const rows = Math.ceil(window.innerHeight / 44) + 2;
-for (let i = 0; i < cols * rows; i++) {
-  const b = document.createElement('div');
-  b.className = 'pxBlock';
-  b.style.background = BLOCK_COLORS[Math.floor(Math.random() * BLOCK_COLORS.length)];
-  b.style.opacity = (0.35 + Math.random() * 0.35).toFixed(2);
-  grid.appendChild(b);
+const BCOLS=['#fce4ec','#fce4ec','#fce4ec','#f8bbd9','#f8bbd9','#e8f5e9','#fff3e0','#f3e5f5','#fddde6'];
+const pgrid=document.getElementById('pixelGrid');
+const gc=Math.ceil(window.innerWidth/44)+2, gr=Math.ceil(window.innerHeight/44)+2;
+for(let i=0;i<gc*gr;i++){
+  const b=document.createElement('div'); b.className='pxBlock';
+  b.style.background=BCOLS[Math.floor(Math.random()*BCOLS.length)];
+  b.style.opacity=(0.32+Math.random()*0.36).toFixed(2);
+  pgrid.appendChild(b);
 }
 
 // ── FLOATERS ──
-const FLOATERS = ['🌺','💐','🌻','✨','🌸','💮','🍀','🌼'];
-const fl = document.getElementById('floatLayer');
-function spawnFloater() {
-  const d = document.createElement('div');
-  d.className = 'floater';
-  const dur = 9 + Math.random() * 13;
-  d.textContent = FLOATERS[Math.floor(Math.random() * FLOATERS.length)];
-  d.style.cssText = `left:${Math.random()*100}%;bottom:-60px;font-size:${15+Math.random()*22}px;animation-duration:${dur}s;animation-delay:0s`;
-  fl.appendChild(d);
-  setTimeout(() => d.remove(), dur * 1000);
+const FLOATEMOJIS=['🌺','💐','🌻','✨','🌸','💮','🍀','🌼'];
+const flLayer=document.getElementById('floatLayer');
+function spawnFloater(){
+  const d=document.createElement('div'); d.className='floater';
+  const dur=9+Math.random()*12;
+  d.textContent=FLOATEMOJIS[Math.floor(Math.random()*FLOATEMOJIS.length)];
+  d.style.cssText=`left:${Math.random()*100}%;bottom:-60px;font-size:${14+Math.random()*20}px;animation-duration:${dur}s`;
+  flLayer.appendChild(d); setTimeout(()=>d.remove(),dur*1000);
 }
-for (let i = 0; i < 14; i++) setTimeout(spawnFloater, i * 500);
-setInterval(spawnFloater, 1400);
+for(let i=0;i<12;i++) setTimeout(spawnFloater,i*450);
+setInterval(spawnFloater,1500);
 
 // ── STATE ──
-let sorry = 0;
-let catches = 0;
-let transforms = 0;
-let done = false;
-const meterFill = document.getElementById('meterFill');
-const meterPct = document.getElementById('meterPct');
+let sorry=0, catches=0, transforms=0, lives=3, done=false, gameActive=false, meowMode=false;
+const meterFill=document.getElementById('meterFill');
+const meterPct=document.getElementById('meterPct');
+const livesBox=document.getElementById('livesBox');
+const livesDisplay=document.getElementById('livesDisplay');
+let fallingInterval=null, knifeInterval=null;
 
-function addSorry(amt) {
-  if (done) return;
-  sorry = Math.min(100, sorry + amt);
-  meterFill.style.width = sorry + '%';
-  meterPct.textContent = Math.round(sorry) + '%';
-  if (sorry >= 100 && !done) { done = true; setTimeout(showFinal, 900); }
+function renderLives(){
+  livesDisplay.innerHTML='';
+  for(let i=0;i<3;i++){
+    const s=document.createElement('span');
+    s.textContent=i<lives?'🥔':'💀';
+    livesDisplay.appendChild(s);
+  }
+}
+
+function addSorry(amt){
+  if(done||!gameActive) return;
+  sorry=Math.min(100,sorry+amt);
+  meterFill.style.width=sorry+'%';
+  meterPct.textContent=Math.round(sorry)+'%';
+  if(sorry>=100&&!done){done=true;setTimeout(showFinal,700);}
+}
+
+function removeSorry(amt){
+  if(done||!gameActive) return;
+  sorry=Math.max(0,sorry-amt);
+  meterFill.style.width=sorry+'%';
+  meterPct.textContent=Math.round(sorry)+'%';
+  // red flash on bar then back
+  meterFill.classList.add('hurt');
+  setTimeout(()=>meterFill.classList.remove('hurt'),700);
+  // screen flash
+  const fo=document.getElementById('flashOverlay');
+  fo.classList.add('flash'); setTimeout(()=>fo.classList.remove('flash'),280);
+  // shake
+  document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),350);
+}
+
+function loseLife(){
+  if(!meowMode||done) return;
+  lives=Math.max(0,lives-1); renderLives();
+  document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),350);
+  const fo=document.getElementById('flashOverlay');
+  fo.classList.add('flash'); setTimeout(()=>fo.classList.remove('flash'),280);
+  showToast(window.innerWidth/2-90, window.innerHeight*0.45, 'a potato escaped! 😭 -1 life', true);
+  if(lives<=0) triggerGameOver();
 }
 
 // ── SPARKLES ──
-function spawnSparkles(x, y) {
-  const dirs = [[-32,-44],[32,-44],[0,-55],[46,-22],[-46,-22],[22,32],[-22,32],[40,20],[-40,20]];
-  dirs.forEach(([dx, dy]) => {
-    const s = document.createElement('div');
-    s.className = 'sparkle';
-    s.textContent = ['✨','💫','⭐','🌟'][Math.floor(Math.random()*4)];
-    s.style.cssText = `left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px`;
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 1000);
+function spawnSparkles(x,y,bad=false){
+  const glyphs=bad?['💥','🔴','❌']:['✨','💫','⭐','🌟'];
+  [[-30,-44],[30,-44],[0,-52],[44,-20],[-44,-20],[20,30],[-20,30],[38,18],[-38,18]].forEach(([dx,dy])=>{
+    const s=document.createElement('div'); s.className='sparkle';
+    s.textContent=glyphs[Math.floor(Math.random()*glyphs.length)];
+    s.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px`;
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1000);
   });
 }
 
 // ── TOAST ──
-const HIDDEN_MSGS = [
-  "minimeow pls don't be mad 😔",
-  "i was dumb but i'm trying 🥔➡️🍠",
-  "you matter a lot 💚",
-  "i think about you a lot 🌺",
-  "sorry isn't enough but i mean it 💐",
-  "chotehath regrets many things 😭",
-  "you're the best minimeow ever 🐾",
-  "please 🙏 just a little forgiveness?",
-];
-let toastCount = 0;
-function showToast(x, y, msg, autoClose = true) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  const tx = Math.min(Math.max(x - 105, 10), window.innerWidth - 220);
-  const ty = Math.max(y - 80, 10);
-  t.style.cssText = `left:${tx}px;top:${ty}px;z-index:${200 + toastCount++}`;
-  t.onclick = () => t.remove();
+const HIDDENMSGS=["minimeow pls don't be mad 😔","i was dumb but i'm trying 🥔➡️🍠","you matter a lot 💚","i think about you often 🌺","sorry isn't enough but i mean it 💐","chotehath regrets everything 😭","you're literally the best 🐾","pls just a little forgiveness? 🙏"];
+let tz=200;
+function showToast(x,y,msg,bad=false,ac=true){
+  const t=document.createElement('div'); t.className='toast'+(bad?' bad':'');
+  t.textContent=msg;
+  t.style.cssText=`left:${Math.min(Math.max(x-100,8),window.innerWidth-215)}px;top:${Math.max(y-76,8)}px;z-index:${tz++}`;
+  t.onclick=()=>t.remove();
   document.body.appendChild(t);
-  if (autoClose) setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(() => t.remove(), 400); }, 2800);
+  if(ac) setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .35s';setTimeout(()=>t.remove(),380);},2400);
 }
 
-// ── STATIONARY POTATOES ──
-const POTATO_POS = [
-  [12,28],[73,52],[8,63],[82,72],[22,82],[64,38],[42,68],[56,84],[87,47],[32,42],[50,20],[18,50]
-];
-POTATO_POS.forEach(([xp, yp], i) => {
-  const d = document.createElement('div');
-  d.className = 'potato';
-  d.textContent = '🥔';
-  d.style.cssText = `left:${xp}%;top:${yp}%;animation-duration:${1.8+Math.random()*2}s;animation-delay:${Math.random()*1}s`;
-  d.addEventListener('click', function(e) {
-    if (d.dataset.used) return;
-    d.dataset.used = '1';
-    d.classList.add('clicked');
-    const r = d.getBoundingClientRect();
-    spawnSparkles(r.left + r.width/2, r.top + r.height/2);
-    setTimeout(() => { d.textContent = '🍠'; }, 300);
+// ── STATIC POTATOES — only 3! ──
+[[16,36],[80,54],[48,74]].forEach(([xp,yp])=>{
+  const d=document.createElement('div'); d.className='potato'; d.textContent='🥔';
+  d.style.cssText=`left:${xp}%;top:${yp}%;animation-duration:${1.9+Math.random()*1.8}s;animation-delay:${Math.random()*.8}s`;
+  d.addEventListener('click',function(e){
+    if(d.dataset.used||!gameActive) return;
+    d.dataset.used='1'; d.classList.add('clicked');
+    const r=d.getBoundingClientRect();
+    spawnSparkles(r.left+r.width/2, r.top+r.height/2);
+    setTimeout(()=>{d.textContent='🍠';},300);
     transforms++;
-    document.getElementById('transCount').textContent = transforms;
-    addSorry(8);
-    resetIdle();
-    if (Math.random() < 0.6) {
-      setTimeout(() => showToast(r.left + r.width/2, r.top, HIDDEN_MSGS[Math.floor(Math.random()*HIDDEN_MSGS.length)]), 350);
-    }
+    addSorry(12); resetIdle();
+    if(Math.random()<.55) setTimeout(()=>showToast(r.left+r.width/2,r.top,HIDDENMSGS[Math.floor(Math.random()*HIDDENMSGS.length)]),350);
   });
   document.body.appendChild(d);
 });
 
-// ── KNIFE EASTER EGG ──
-function spawnKnife() {
-  if (done) return;
-  const d = document.createElement('div');
-  d.className = 'potato';
-  d.textContent = '🔪';
-  d.style.cssText = `left:${18+Math.random()*62}%;top:${28+Math.random()*52}%;animation-duration:2.8s;font-size:30px;animation-delay:0s`;
-  d.addEventListener('click', function(e) {
-    if (d.dataset.used) return;
-    d.dataset.used = '1';
-    const r = d.getBoundingClientRect();
-    d.textContent = '💭';
-    d.style.pointerEvents = 'none';
-    showToast(r.left + r.width/2, r.top, "don't worry this is not for minimeow 😭", false);
-    setTimeout(() => {
-      if (d.parentNode) {
-        d.textContent = '🌺';
-        spawnSparkles(d.getBoundingClientRect().left + 20, d.getBoundingClientRect().top + 20);
-        setTimeout(() => d.remove(), 1600);
-      }
-    }, 1500);
-    resetIdle();
-  });
-  document.body.appendChild(d);
-  setTimeout(() => { if (d.parentNode && !d.dataset.used) d.remove(); }, 9000);
-}
-setTimeout(spawnKnife, 7000);
-setInterval(spawnKnife, 20000);
-
-// ── FALLING POTATO GAME ──
-const gl = document.getElementById('gameLayer');
-function spawnFallingPotato() {
-  if (done) return;
-  const d = document.createElement('div');
-  d.className = 'fallingPotato';
-  d.textContent = '🥔';
-  const dur = 2.8 + Math.random() * 3.2;
-  d.style.cssText = `left:${4+Math.random()*88}%;animation-duration:${dur}s`;
-  let caught = false;
-  d.addEventListener('click', function(e) {
-    if (caught) return; caught = true;
-    d.style.animation = 'none';
-    spawnSparkles(e.clientX, e.clientY);
-    d.textContent = '🍠';
-    catches++;
-    document.getElementById('catchCount').textContent = catches;
-    addSorry(5);
-    resetIdle();
-    setTimeout(() => d.remove(), 500);
+// ── FALLING POTATOES ──
+const gl=document.getElementById('gameLayer');
+function spawnFallingPotato(){
+  if(done||!gameActive) return;
+  const d=document.createElement('div'); d.className='fallingItem'; d.textContent='🥔';
+  // normal: slow and chill. meow: faster
+  const dur=meowMode?(1.8+Math.random()*2):(3.2+Math.random()*3);
+  d.style.cssText=`left:${5+Math.random()*86}%;animation-duration:${dur}s`;
+  let caught=false;
+  d.addEventListener('click',function(e){
+    if(caught) return; caught=true;
+    d.style.animation='none'; d.textContent='🍠';
+    spawnSparkles(e.clientX,e.clientY);
+    catches++; addSorry(5); resetIdle();
+    setTimeout(()=>d.remove(),400);
   });
   gl.appendChild(d);
-  setTimeout(() => { if (!caught && d.parentNode) d.remove(); }, dur * 1000 + 300);
+  setTimeout(()=>{
+    if(!caught&&d.parentNode){
+      d.remove();
+      // normal mode: no penalty. meow mode: lose a life
+      if(meowMode&&!done&&gameActive) loseLife();
+    }
+  }, dur*1000+200);
 }
-setInterval(spawnFallingPotato, 1800);
-setTimeout(spawnFallingPotato, 600);
-setTimeout(spawnFallingPotato, 1200);
 
-// ── IDLE DETECTION ──
+// ── FALLING KNIVES — hurt in BOTH modes ──
+function spawnFallingKnife(){
+  if(done||!gameActive) return;
+  const d=document.createElement('div'); d.className='fallingItem'; d.textContent='🔪';
+  const dur=meowMode?(1.6+Math.random()*1.8):(2.4+Math.random()*2.4);
+  d.style.cssText=`left:${5+Math.random()*86}%;animation-duration:${dur}s;font-size:28px;filter:drop-shadow(0 2px 10px rgba(200,0,80,.55))`;
+  let hit=false;
+  d.addEventListener('click',function(e){
+    if(hit) return; hit=true;
+    d.style.animation='none'; d.textContent='💀';
+    spawnSparkles(e.clientX,e.clientY,true);
+    removeSorry(6);
+    showToast(e.clientX-90,e.clientY-80,"ouch! -6% 🔪 don't touch knives!",true);
+    setTimeout(()=>d.remove(),450);
+  });
+  gl.appendChild(d);
+  setTimeout(()=>{if(!hit&&d.parentNode) d.remove();}, dur*1000+200);
+}
+
+// ── START INTERVALS ──
+function startFallingIntervals(){
+  clearInterval(fallingInterval); clearInterval(knifeInterval);
+  document.querySelectorAll('.fallingItem').forEach(e=>e.remove());
+  const pRate=meowMode?1300:2200;
+  const kRate=meowMode?3000:6000;
+  setTimeout(spawnFallingPotato,400);
+  setTimeout(spawnFallingPotato,1200);
+  fallingInterval=setInterval(spawnFallingPotato,pRate);
+  setTimeout(spawnFallingKnife,meowMode?2500:5000);
+  knifeInterval=setInterval(spawnFallingKnife,kRate);
+}
+
+// ── IDLE ──
 let idleTimer;
-const idleMsg = document.getElementById('idleMsg');
-function resetIdle() {
-  clearTimeout(idleTimer);
-  idleMsg.style.display = 'none';
-  idleTimer = setTimeout(() => { if (!done) idleMsg.style.display = 'block'; }, 9000);
+const idleMsg=document.getElementById('idleMsg');
+function resetIdle(){
+  clearTimeout(idleTimer); idleMsg.style.display='none';
+  idleTimer=setTimeout(()=>{if(!done&&gameActive) idleMsg.style.display='block';},9000);
 }
-resetIdle();
-document.body.addEventListener('click', resetIdle);
-document.body.addEventListener('touchstart', resetIdle);
+document.body.addEventListener('click',resetIdle);
+document.body.addEventListener('touchstart',resetIdle);
 
-// ── SECRET EMOJI ROW ──
-const SECRET_EMOJIS = ['🌺','💐','🌻','✨','🌸','💮'];
-const SECRET_MSGS = [
-  "minimeow pls 😔","still here 💚","i mean it 🌺","don't be mad 😭","i tried ok? 💐","u matter 💚","every sorry counts 🥔","still counting on u 🌻"
-];
-const secretRow = document.getElementById('secretRow');
-SECRET_EMOJIS.forEach((em, i) => {
-  const d = document.createElement('div');
-  d.className = 'secretEmoji';
-  d.textContent = em;
-  d.style.animationDuration = `${1.5 + i * 0.3}s`;
-  d.style.animationDelay = `${i * 0.2}s`;
-  d.addEventListener('click', function(e) {
-    const r = d.getBoundingClientRect();
-    showToast(r.left + r.width/2, r.top, SECRET_MSGS[Math.floor(Math.random()*SECRET_MSGS.length)]);
-    spawnSparkles(r.left + r.width/2, r.top + r.height/2);
-    resetIdle();
+// ── SECRET EMOJIS ──
+const SECEMOJIS=['🌺','💐','🌻','✨','🌸','💮'];
+const SECMSGS=["minimeow pls 😔","still here 💚","i mean it 🌺","don't be mad 😭","i tried 💐","u matter 💚","every sorry counts 🥔","still rooting for us 🌻"];
+const secretRow=document.getElementById('secretRow');
+SECEMOJIS.forEach((em,i)=>{
+  const d=document.createElement('div'); d.className='secretEmoji'; d.textContent=em;
+  d.style.animationDuration=`${1.4+i*.3}s`; d.style.animationDelay=`${i*.18}s`;
+  d.addEventListener('click',function(){
+    if(!gameActive) return;
+    const r=d.getBoundingClientRect();
+    showToast(r.left,r.top,SECMSGS[Math.floor(Math.random()*SECMSGS.length)]);
+    spawnSparkles(r.left+r.width/2,r.top+r.height/2); resetIdle();
   });
   secretRow.appendChild(d);
 });
 
-// ── MINIMEOW MODE ──
-document.getElementById('minimeowToggle').addEventListener('click', function() {
-  document.body.classList.toggle('meowMode');
-  this.textContent = document.body.classList.contains('meowMode') ? '🌸 normal mode' : '🐾 minimeow mode';
-  // Extra sparkle burst in meow mode
-  if (document.body.classList.contains('meowMode')) {
-    for (let i = 0; i < 20; i++) {
-      setTimeout(() => {
-        spawnSparkles(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.7);
-      }, i * 60);
+// ── CAT SLIDER TOGGLE ──
+const catSlider=document.getElementById('catSlider');
+const modeLabel=document.getElementById('modeLabel');
+catSlider.addEventListener('click',function(){
+  if(!meowMode){
+    // switching TO meow mode — show mini popup
+    document.getElementById('meowPopup').style.display='flex';
+  } else {
+    // switching back to normal
+    meowMode=false;
+    document.body.classList.remove('meowMode');
+    modeLabel.textContent='normal 🌸\nmode';
+    modeLabel.innerHTML='normal 🌸<br>mode';
+    livesBox.style.display='none';
+    startFallingIntervals();
+  }
+});
+document.getElementById('meowOkBtn').addEventListener('click',function(){
+  document.getElementById('meowPopup').style.display='none';
+  meowMode=true; lives=3; renderLives();
+  document.body.classList.add('meowMode');
+  modeLabel.innerHTML='😺 minimeow<br>hard mode';
+  livesBox.style.display='block';
+  // sparkle burst
+  for(let i=0;i<18;i++) setTimeout(()=>spawnSparkles(Math.random()*window.innerWidth,Math.random()*window.innerHeight*.7),i*45);
+  startFallingIntervals();
+});
+
+// ── GAME OVER ──
+function triggerGameOver(){
+  done=true; gameActive=false;
+  clearInterval(fallingInterval); clearInterval(knifeInterval);
+  document.querySelectorAll('.fallingItem').forEach(e=>e.remove());
+  setTimeout(()=>document.getElementById('gameOverScreen').style.display='flex',500);
+}
+document.getElementById('retryBtn').addEventListener('click',()=>{
+  sorry=0; catches=0; transforms=0; lives=3; done=false; gameActive=true;
+  meterFill.style.width='0%'; meterPct.textContent='0%'; renderLives();
+  document.querySelectorAll('.potato').forEach(p=>{
+    delete p.dataset.used; p.classList.remove('clicked'); p.textContent='🥔'; p.style.pointerEvents='all';
+  });
+  document.getElementById('gameOverScreen').style.display='none';
+  startFallingIntervals(); resetIdle();
+});
+
+// ── OPENING ──
+function closeOpening(){
+  const op=document.getElementById('openingPopup');
+  op.style.opacity='0'; op.style.transition='opacity .4s';
+  setTimeout(()=>{op.style.display='none'; gameActive=true; startFallingIntervals(); resetIdle();},400);
+}
+document.getElementById('openingPopup').addEventListener('click',function(e){
+  if(e.target===this||e.target.id==='openingCard'||e.target.tagName!=='BUTTON') closeOpening();
+});
+document.getElementById('startBtn').addEventListener('click',function(e){
+  e.stopPropagation(); closeOpening();
+});
+
+// ── FINAL ──
+const CONFCOLORS=['#f48fb1','#e91e8c','#a5d6a7','#fff176','#ce93d8','#80cbc4','#ffcc80','#ef9a9a'];
+function showFinal(){
+  gameActive=false;
+  clearInterval(fallingInterval); clearInterval(knifeInterval);
+  document.querySelectorAll('.fallingItem').forEach(e=>e.remove());
+  document.getElementById('finalScene').style.display='flex';
+  const cl=document.getElementById('confettiLayer');
+  function doConfetti(n){
+    for(let i=0;i<n;i++){
+      setTimeout(()=>{
+        const c=document.createElement('div'); c.className='confettiPiece';
+        const sz=5+Math.random()*11, dur=2.2+Math.random()*3;
+        c.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:${CONFCOLORS[Math.floor(Math.random()*CONFCOLORS.length)]};animation-duration:${dur}s;animation-delay:${Math.random()*.4}s;transform:rotate(${Math.random()*360}deg)`;
+        cl.appendChild(c); setTimeout(()=>c.remove(),(dur+.6)*1000);
+      },i*25);
     }
   }
-});
-
-// ── FINAL SCENE ──
-function showFinal() {
-  const fs = document.getElementById('finalScene');
-  fs.style.display = 'flex';
-  const emojis = ['🌺','💐','✨','🌸','💚','🍠','💫','⭐'];
-  for (let i = 0; i < 45; i++) {
-    setTimeout(() => {
-      const e = document.createElement('div');
-      e.className = 'burstEmoji';
-      e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      e.style.cssText = `left:50%;top:50%;--bx:${(Math.random()-0.5)*Math.max(window.innerWidth,600)}px;--by:${(Math.random()-0.5)*Math.max(window.innerHeight,600)}px;animation-duration:${1.2+Math.random()*1.8}s;font-size:${20+Math.random()*20}px`;
-      fs.appendChild(e);
-      setTimeout(() => e.remove(), 3000);
-    }, i * 60);
+  doConfetti(90);
+  setInterval(()=>doConfetti(35),3200);
+  const burstEmojis=['🌺','💐','✨','🌸','💚','🍠','💫','⭐','🎉','🎊','🐾'];
+  for(let i=0;i<55;i++){
+    setTimeout(()=>{
+      const e=document.createElement('div'); e.className='burstEmoji';
+      e.textContent=burstEmojis[Math.floor(Math.random()*burstEmojis.length)];
+      e.style.cssText=`left:50%;top:50%;--bx:${(Math.random()-.5)*Math.max(window.innerWidth,500)}px;--by:${(Math.random()-.5)*Math.max(window.innerHeight,500)}px;animation-duration:${1.1+Math.random()*1.9}s;font-size:${17+Math.random()*22}px`;
+      document.getElementById('finalScene').appendChild(e);
+      setTimeout(()=>e.remove(),3100);
+    },i*50);
   }
 }
-function closeFinal() {
-  document.getElementById('finalScene').style.display = 'none';
+function closeFinal(){
+  document.getElementById('finalScene').style.display='none';
+  sorry=0; done=false; gameActive=true;
+  meterFill.style.width='0%'; meterPct.textContent='0%';
+  if(meowMode){lives=3;renderLives();}
+  startFallingIntervals(); resetIdle();
 }
 
-// click anywhere on final scene bg to close
-document.getElementById('finalScene').addEventListener('click', function(e) {
-  if (e.target === this) closeFinal();
-});
+renderLives();
 </script>
 </body>
 </html>
