@@ -36,6 +36,12 @@ body.meowMode .pxBlock{ filter:hue-rotate(55deg) saturate(1.2); }
 /* falling items */
 #gameLayer{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
 .fallingItem{position:absolute;font-size:32px;cursor:pointer;pointer-events:all;animation:fall linear forwards;transition:transform .08s;}
+.fallingPotato{
+  width:74px;height:74px;
+  margin-left:-21px;margin-top:-21px;
+  display:grid;place-items:center;
+  line-height:1;border-radius:50%;
+}
 .fallingItem:hover{transform:scale(1.4) rotate(-8deg)!important;}
 @keyframes fall{0%{top:-70px}100%{top:110vh}}
 
@@ -394,7 +400,7 @@ body.shake{animation:shake .35s ease;}
   <div id="finalCard">
     <span class="cats-row">🐱😸🐾😻🐱</span>
     <div class="fin-title">✨ minimeow ✨<br>we did it!</div>
-    <div class="fin-msg">
+    <div class="fin-msg" id="finalMessage">
       i'm really truly sorry 💚<br>
       (practiced this 47 times btw)<br>
       from your dumb chotehath 🥔
@@ -439,7 +445,8 @@ const meterFill=document.getElementById('meterFill');
 const meterPct=document.getElementById('meterPct');
 const livesBox=document.getElementById('livesBox');
 const livesDisplay=document.getElementById('livesDisplay');
-let fallingInterval=null, knifeInterval=null;
+const finalMessage=document.getElementById('finalMessage');
+let fallingInterval=null, knifeInterval=null, finalConfettiInterval=null;
 
 function renderLives(){
   livesDisplay.innerHTML='';
@@ -463,13 +470,10 @@ function removeSorry(amt){
   sorry=Math.max(0,sorry-amt);
   meterFill.style.width=sorry+'%';
   meterPct.textContent=Math.round(sorry)+'%';
-  // red flash on bar then back
   meterFill.classList.add('hurt');
   setTimeout(()=>meterFill.classList.remove('hurt'),700);
-  // screen flash
   const fo=document.getElementById('flashOverlay');
   fo.classList.add('flash'); setTimeout(()=>fo.classList.remove('flash'),280);
-  // shake
   document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),350);
 }
 
@@ -524,12 +528,11 @@ function showToast(x,y,msg,bad=false,ac=true){
 });
 
 // ── FALLING POTATOES ──
-const gl=document.getElementById('gameLayer');
 function spawnFallingPotato(){
   if(done||!gameActive) return;
-  const d=document.createElement('div'); d.className='fallingItem'; d.textContent='🥔';
-  // normal: slow and chill. meow: faster
-  const dur=meowMode?(1.8+Math.random()*2):(3.2+Math.random()*3);
+  const d=document.createElement('div'); d.className='fallingItem fallingPotato'; d.textContent='🥔';
+  // minimeow mode is faster again, but the potato has a larger tap area
+  const dur=meowMode?(2.15+Math.random()*1.95):(3.2+Math.random()*3);
   d.style.cssText=`left:${5+Math.random()*86}%;animation-duration:${dur}s`;
   let caught=false;
   d.addEventListener('click',function(e){
@@ -543,13 +546,13 @@ function spawnFallingPotato(){
   setTimeout(()=>{
     if(!caught&&d.parentNode){
       d.remove();
-      // normal mode: no penalty. meow mode: lose a life
       if(meowMode&&!done&&gameActive) loseLife();
     }
   }, dur*1000+200);
 }
 
 // ── FALLING KNIVES — hurt in BOTH modes ──
+const gl=document.getElementById('gameLayer');
 function spawnFallingKnife(){
   if(done||!gameActive) return;
   const d=document.createElement('div'); d.className='fallingItem'; d.textContent='🔪';
@@ -572,7 +575,7 @@ function spawnFallingKnife(){
 function startFallingIntervals(){
   clearInterval(fallingInterval); clearInterval(knifeInterval);
   document.querySelectorAll('.fallingItem').forEach(e=>e.remove());
-  const pRate=meowMode?1300:2200;
+  const pRate=meowMode?1000:2200;
   const kRate=meowMode?3000:6000;
   setTimeout(spawnFallingPotato,400);
   setTimeout(spawnFallingPotato,1200);
@@ -612,13 +615,10 @@ const catSlider=document.getElementById('catSlider');
 const modeLabel=document.getElementById('modeLabel');
 catSlider.addEventListener('click',function(){
   if(!meowMode){
-    // switching TO meow mode — show mini popup
     document.getElementById('meowPopup').style.display='flex';
   } else {
-    // switching back to normal
     meowMode=false;
     document.body.classList.remove('meowMode');
-    modeLabel.textContent='normal 🌸\nmode';
     modeLabel.innerHTML='normal 🌸<br>mode';
     livesBox.style.display='none';
     startFallingIntervals();
@@ -630,7 +630,6 @@ document.getElementById('meowOkBtn').addEventListener('click',function(){
   document.body.classList.add('meowMode');
   modeLabel.innerHTML='😺 minimeow<br>hard mode';
   livesBox.style.display='block';
-  // sparkle burst
   for(let i=0;i<18;i++) setTimeout(()=>spawnSparkles(Math.random()*window.innerWidth,Math.random()*window.innerHeight*.7),i*45);
   startFallingIntervals();
 });
@@ -671,6 +670,9 @@ function showFinal(){
   gameActive=false;
   clearInterval(fallingInterval); clearInterval(knifeInterval);
   document.querySelectorAll('.fallingItem').forEach(e=>e.remove());
+  finalMessage.innerHTML=meowMode
+    ? "i'm really truly sorry 💚<br>(practiced this 47 times btw)<br>from your dumb chotehath 🥔<br><br>wow you completed the hard level,<br>you have earned a pani puri treat,<br>send this page ka screenshot to redeem"
+    : "i'm really truly sorry 💚<br>(practiced this 47 times btw)<br>from your dumb chotehath 🥔";
   document.getElementById('finalScene').style.display='flex';
   const cl=document.getElementById('confettiLayer');
   function doConfetti(n){
@@ -684,7 +686,8 @@ function showFinal(){
     }
   }
   doConfetti(90);
-  setInterval(()=>doConfetti(35),3200);
+  clearInterval(finalConfettiInterval);
+  finalConfettiInterval=setInterval(()=>doConfetti(35),3200);
   const burstEmojis=['🌺','💐','✨','🌸','💚','🍠','💫','⭐','🎉','🎊','🐾'];
   for(let i=0;i<55;i++){
     setTimeout(()=>{
@@ -698,6 +701,7 @@ function showFinal(){
 }
 function closeFinal(){
   document.getElementById('finalScene').style.display='none';
+  clearInterval(finalConfettiInterval);
   sorry=0; done=false; gameActive=true;
   meterFill.style.width='0%'; meterPct.textContent='0%';
   if(meowMode){lives=3;renderLives();}
