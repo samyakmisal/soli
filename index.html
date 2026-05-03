@@ -502,6 +502,7 @@ function spawnSparkles(x,y,bad=false){
 const HIDDENMSGS=["minimeow pls don't be mad 😔","i was dumb but i'm trying 🥔➡️🍠","you matter a lot 💚","i think about you often 🌺","sorry isn't enough but i mean it 💐","chotehath regrets everything 😭","you're literally the best 🐾","pls just a little forgiveness? 🙏"];
 let tz=200;
 function showToast(x,y,msg,bad=false,ac=true){
+  if(meowMode && !bad) return;
   const t=document.createElement('div'); t.className='toast'+(bad?' bad':'');
   t.textContent=msg;
   t.style.cssText=`left:${Math.min(Math.max(x-100,8),window.innerWidth-215)}px;top:${Math.max(y-76,8)}px;z-index:${tz++}`;
