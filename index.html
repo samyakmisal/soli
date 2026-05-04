@@ -384,7 +384,7 @@ body.shake{animation:shake .35s ease;}
 <div id="gameOverScreen">
   <div id="gameOverCard">
     <span class="go-emoji">😿</span>
-    <div class="go-title"HARLIS🥀</div>
+    <div class="go-title">HARLIS🥀</div>
     <div class="go-sub">
       too many potatoes escaped!<br><br>
       minimeow is still waiting…<br>
@@ -440,7 +440,7 @@ for(let i=0;i<12;i++) setTimeout(spawnFloater,i*450);
 setInterval(spawnFloater,1500);
 
 // ── STATE ──
-let sorry=0, catches=0, transforms=0, lives=3, done=false, gameActive=false, meowMode=false;
+let sorry=0, catches=0, transforms=0, lives=3, done=false, gameActive=false, meowMode=false, finalQueued=false, finalShown=false;
 const meterFill=document.getElementById('meterFill');
 const meterPct=document.getElementById('meterPct');
 const livesBox=document.getElementById('livesBox');
@@ -458,11 +458,26 @@ function renderLives(){
 }
 
 function addSorry(amt){
-  if(done||!gameActive) return;
+  if(finalShown||!gameActive) return;
   sorry=Math.min(100,sorry+amt);
   meterFill.style.width=sorry+'%';
   meterPct.textContent=Math.round(sorry)+'%';
-  if(sorry>=100&&!done){done=true;setTimeout(showFinal,700);}
+  if(sorry>=100) triggerWin();
+}
+
+function queueFinalWin(){
+  if(finalQueued) return;
+  finalQueued=true;
+  setTimeout(()=>{
+    if(done && !finalShown) showFinal();
+  }, meowMode ? 250 : 700);
+}
+
+function triggerWin(){
+  if(finalShown) return;
+  done=true;
+  queueFinalWin();
+  showFinal();
 }
 
 function removeSorry(amt){
@@ -643,7 +658,7 @@ function triggerGameOver(){
   setTimeout(()=>document.getElementById('gameOverScreen').style.display='flex',500);
 }
 document.getElementById('retryBtn').addEventListener('click',()=>{
-  sorry=0; catches=0; transforms=0; lives=3; done=false; gameActive=true;
+  sorry=0; catches=0; transforms=0; lives=3; done=false; gameActive=true; finalQueued=false; finalShown=false;
   meterFill.style.width='0%'; meterPct.textContent='0%'; renderLives();
   document.querySelectorAll('.potato').forEach(p=>{
     delete p.dataset.used; p.classList.remove('clicked'); p.textContent='🥔'; p.style.pointerEvents='all';
@@ -668,6 +683,8 @@ document.getElementById('startBtn').addEventListener('click',function(e){
 // ── FINAL ──
 const CONFCOLORS=['#f48fb1','#e91e8c','#a5d6a7','#fff176','#ce93d8','#80cbc4','#ffcc80','#ef9a9a'];
 function showFinal(){
+  if(finalShown) return;
+  finalShown=true;
   gameActive=false;
   clearInterval(fallingInterval); clearInterval(knifeInterval);
   document.querySelectorAll('.fallingItem').forEach(e=>e.remove());
@@ -703,7 +720,7 @@ function showFinal(){
 function closeFinal(){
   document.getElementById('finalScene').style.display='none';
   clearInterval(finalConfettiInterval);
-  sorry=0; done=false; gameActive=true;
+  sorry=0; done=false; gameActive=true; finalQueued=false; finalShown=false;
   meterFill.style.width='0%'; meterPct.textContent='0%';
   if(meowMode){lives=3;renderLives();}
   startFallingIntervals(); resetIdle();
